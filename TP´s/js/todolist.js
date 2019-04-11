@@ -5,7 +5,7 @@
  * @since 04/03/19.
  * @version 1.0
  */
-(($) => {
+(() => {
     'use strict';
 
     const API_URL = 'https://task-backend-fpuna.herokuapp.com/tasks';
@@ -23,44 +23,31 @@
         }
     }
 
-
     /**
      * This method is executed once the page have just been loaded and call the service to retrieve the
      * list of tasks
      */
-    //setInterval(function(){ location.reload(true); }, 3000);
     document.onreadystatechange = () => {
-        
+
         // TODO ITEM 0: Llamar al API con el método GET para recuperar la lista de tareas existentes.
         //  - Como parámetro `callbackSuccess` envía la función `loadTasks`.
         //  - Como parámetro `callbackError` envía una función que llame al método `showError` enviando un mensaje de
         //    error
         //  - La llamada debe ser asíncrona.
-        //Ajax.sendGetRequest(API_URL, {}, MediaFormat.JSON, loadTasks, (text) => showError(1, text), true);
-        $.get(`${API_URL}`, loadTasks);
-        //setInterval(function(){ alert("Hello"); }, 3000);
+        Ajax.sendGetRequest(API_URL, {}, MediaFormat.JSON, loadTasks, (code) => showError(code, 'La tarea no ha podido ser añadida.'), true);
+  
 
     };
-    
+
     /**
      * This method displays an error on the page.
      * @param code the status code of the HTTP response.
      * @param text error message
      */
     const showError = (code, text) => {
-        console.log("showError");
         // TODO ITEM 6 recuperar el elemento HTML con la clase `error-bar` y modificar el HTML interno de
         // manera a mostrar el mensaje de error.
         // El mensaje de error debe desaparacer luego de 3 segundos.
-
-        let errorBar = document.getElementsByClassName('error-bar')[0];
-        errorBar.innerHTML = `${text}. Cod error: ${code}`;
-        errorBar.classList.remove('hide-bar');
-        errorBar.classList.add('show-bar');
-        setTimeout(() => {
-            errorBar.classList.remove('show-bar');
-            errorBar.classList.add('hide-bar');
-        }, 3000);
     };
 
 
@@ -69,9 +56,9 @@
      *
      * @param array the string coming on the body of the API response
      */
-    const loadTasks = (tasks) => {
-        //console.log(tasks);
-        //let tasks = JSON.parse(array);
+    const loadTasks = (array) => {
+
+        let tasks = JSON.parse(array);
         for (let i in tasks) {
             if (tasks.hasOwnProperty(i)) {
                 addTaskToList(tasks[i]);
@@ -93,10 +80,7 @@
         e.preventDefault();
 
         let task = new Task(content);
-        //let content = new Task(content);
-        
-        //let taskjson = JSON.stringify(task);
-        //let task = JSON.parse(content);
+
         // TODO ITEM 1: Llamar al API con el método POST para crear una nueva tarea.
         //  - Como parámetro `callbackSuccess` envía una función que llame al método `addTaskToList` enviando la
         //    variable `task` y limpia el valor del input#new-task.
@@ -106,21 +90,8 @@
         //  - No te olvides de envíar el parámetro `task` para que se cree la tarea.
 
         
-        //Ajax.sendPostRequest(API_URL, task, MediaFormat.JSON, (Task) => addTaskToList(task), (code) => showError(code, 'La tarea no ha podido ser añadida.'), true, MediaFormat.JSON);
-        //console.log(task);
-        //$.post(`${API_URL}`,  (Task) => addTaskToList(task),taskjson,);
-
-        $.ajax({
-                url: API_URL,
-                type: 'POST',
-                data: JSON.stringify(task),
-                contentType:"application/json",
-                success: (Task) => addTaskToList(task)
-        });
-
-        //$('#add').on('click', () => {$.post(API_URL, {"description":"wgom"}, 'application/json');});
-        //$.post(API_URL, JSON.stringify(task), (Task) => addTaskToList(task), "application/json");
-        //document.getElementById('new-task').value = '';
+        Ajax.sendPostRequest(API_URL, task, MediaFormat.JSON, (Task) => addTaskToList(task), (code) => showError(code, 'La tarea no ha podido ser añadida.'), true, MediaFormat.JSON);
+        document.getElementById('new-task').value = '';
 
         return false;
     };
@@ -129,10 +100,8 @@
      * This procedure links the new task button the addTask method on the click event.
      */
     let addButtons = document.getElementsByClassName('add');
-    for (let i in addButtons){
+    for (let i in addButtons)
         addButtons.item(Number(i)).onclick =  (e) => addTask(e);
-
-    }
 
     /**
      * We associate a function to manipulate the DOM once the checkbox value is changed.
@@ -151,33 +120,21 @@
             // - No te olvides de llamar al API (método PUT) para modificar el estado de la tarea en el servidor.
             //*const id = e.target.dataset.id;
 
-            // if (e.target.checked) {
+            if (e.target.checked) {
 
-            //     Ajax.sendPutRequest(`${API_URL}/${task.id}` , {status: TASK_STATUS.DONE}, MediaFormat.JSON, 
-            //         (CurrentTask) => addTaskToList(JSON.parse(CurrentTask)), 
-            //         (code) => showError(code, 'La tarea no ha podido ser modificada.'), true, MediaFormat.JSON);
+                Ajax.sendPutRequest(`${API_URL}/${task.id}` , {status: TASK_STATUS.DONE}, MediaFormat.JSON, 
+                    (CurrentTask) => addTaskToList(JSON.parse(CurrentTask)), 
+                    (code) => showError(code, 'La tarea no ha podido ser modificada.'), true, MediaFormat.JSON);
                 
-            //      document.getElementById(`task-${task.id}`).remove();
-            // } 
-            // else {
-            //     Ajax.sendPutRequest(`${API_URL}/${task.id}` , {status: TASK_STATUS.PENDING}, MediaFormat.JSON, 
-            //         (CurrentTask) => addTaskToList(JSON.parse(CurrentTask)), 
-            //         (code) => showError(code, 'La tarea no ha podido ser modificada.'), true, MediaFormat.JSON);
+                 document.getElementById(`task-${task.id}`).remove();
+            } 
+            else {
+                Ajax.sendPutRequest(`${API_URL}/${task.id}` , {status: TASK_STATUS.PENDING}, MediaFormat.JSON, 
+                    (CurrentTask) => addTaskToList(JSON.parse(CurrentTask)), 
+                    (code) => showError(code, 'La tarea no ha podido ser modificada.'), true, MediaFormat.JSON);
                 
-            //      document.getElementById(`task-${task.id}`).remove();
-            // }
-            const newState = e.target.checked;
-
-            $.ajax({
-                url: `${API_URL}/${task.id}`,
-                type: 'PUT',
-                data: JSON.stringify({status: newState ? 'TERMINADO' : 'PENDIENTE'}),
-                contentType: "application/json",
-                success: function(task){
-                    $(`#task-${task.id}`).remove();
-                    addTaskToList(task);
-                }
-            });
+                 document.getElementById(`task-${task.id}`).remove();
+            }
 
         };
     };
@@ -258,14 +215,8 @@
             //  - La llamada debe ser asíncrona.
             //  - No te olvides de envíar el parámetro para que se cree la tarea.
 
-            //Ajax.sendPutRequest(`${API_URL}/${currentTask.id}` , currentTask, MediaFormat.JSON, (currentTask) => revertHTMLChangeOnEdit(currentTask), (code) => showError(1, 'La tarea no ha podido ser modificada.'), true, MediaFormat.JSON);
-            $.ajax({
-                url: `${API_URL}/${currentTask.id}`,
-                type: 'PUT',
-                data: JSON.stringify({description: currentTask.description}),
-                contentType: "application/json",
-                success: (Task) => revertHTMLChangeOnEdit(currentTask)
-            });
+            Ajax.sendPutRequest(`${API_URL}/${currentTask.id}` , currentTask, MediaFormat.JSON, (currentTask) => revertHTMLChangeOnEdit(currentTask), (code) => showError(1, 'La tarea no ha podido ser modificada.'), true, MediaFormat.JSON);
+            
         };
 
         let buttonCancel = document.createElement('button');
@@ -288,7 +239,6 @@
      * @param currentTask the string coming from the API
      */
     const revertHTMLChangeOnEdit = (currentTask) => {
-        //console.log(currentTask instanceof Task);
         let task = currentTask instanceof Task ? currentTask : JSON.parse(currentTask);
         //let task = JSON.parse(currentTask);
         //let task = currentTask;
@@ -316,9 +266,7 @@
      */
     const removeTaskFromList = (id) => {
         // TODO ITEM 4: remover del DOM HTML el elemento con id `task-${id}`
-        //document.getElementById(`task-${id}`).remove();
-        //console.log("borrar"+id)
-        $(`#task-${id}`).remove();
+        document.getElementById(`task-${id}`).remove();
     };
 
     /**
@@ -334,14 +282,6 @@
         //     un mensaje de error
         //   - La llamada debe ser asíncrona.
 
-        //Ajax.sendDeleteRequest((`${API_URL}/${id}`),{},MediaFormat.JSON, () => removeTaskFromList(id), error => showError(error), true);
-        $.ajax({
-            url: `${API_URL}/${id}`,
-            type: 'DELETE',
-            dataType: 'json',
-            contentType: 'application/json',
-            success: removeTaskFromList(id)
-        });
+        Ajax.sendDeleteRequest((`${API_URL}/${id}`),{},MediaFormat.JSON, () => removeTaskFromList(id), error => showError(error), true);
     };
-
-})(jQuery);
+})();
